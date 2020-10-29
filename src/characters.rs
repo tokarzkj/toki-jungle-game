@@ -16,6 +16,7 @@ pub fn setup_character_sprite_sheet(
             transform: Transform::from_scale(6.0),
             ..Default::default()
         })
+        .with(Character { speed: 500.0 })
         .with(Timer::from_seconds(0.1, true));
 }
 
@@ -28,5 +29,43 @@ pub fn animate_sprite_system(
             let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
             sprite.index = ((sprite.index as usize + 1) % texture_atlas.textures.len()) as u32;
         }
+    }
+}
+
+pub struct Character {
+    speed : f32
+}
+
+pub fn character_movement_system(
+    time: Res<Time>,
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&Character, &mut Transform)>,
+) {
+    for (character, mut transform) in &mut query.iter() {
+        let mut x_direction = 0.0;
+        if keyboard_input.pressed(KeyCode::Left) {
+            x_direction -= 1.0;
+        }
+
+        if keyboard_input.pressed(KeyCode::Right) {
+            x_direction += 1.0;
+        }
+
+        let translation = &mut transform.translation_mut();
+        *translation.x_mut() += time.delta_seconds * x_direction * character.speed;
+        *translation.x_mut() = translation.x().min(450.0).max(-450.0);
+
+        let mut y_direction = 0.0;
+        if keyboard_input.pressed(KeyCode::Up) {
+            y_direction += 1.0;
+        }
+
+        if keyboard_input.pressed(KeyCode::Down) {
+            y_direction -= 1.0;
+        }
+
+        let translation = &mut transform.translation_mut();
+        *translation.y_mut() += time.delta_seconds * y_direction * character.speed;
+        *translation.y_mut() = translation.y().min(300.0).max(-300.0);
     }
 }
