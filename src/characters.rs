@@ -13,7 +13,7 @@ pub fn setup_character_sprite_sheet(
         .spawn(Camera2dComponents::default())
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
-            transform: Transform::from_scale(6.0),
+            transform: Transform::from_translation_rotation_scale(Vec3::new(10.0, 10.0, 1.5), Default::default(), 6.0),
             ..Default::default()
         })
         .with(Character { speed: 500.0, jump_velocity: 0.0, is_jumping: false })
