@@ -16,7 +16,7 @@ pub fn setup_character_sprite_sheet(
             transform: Transform::from_scale(6.0),
             ..Default::default()
         })
-        .with(Character { speed: 500.0 })
+        .with(Character { speed: 500.0, jump_velocity: 0.0, is_jumping: false })
         .with(Timer::from_seconds(0.1, true));
 }
 
@@ -33,15 +33,18 @@ pub fn animate_sprite_system(
 }
 
 pub struct Character {
-    speed : f32
+    speed : f32,
+    jump_velocity: f32,
+    is_jumping : bool,
 }
+
 
 pub fn character_movement_system(
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&Character, &mut Transform)>,
+    mut query: Query<(&mut Character, &mut Transform)>,
 ) {
-    for (character, mut transform) in &mut query.iter() {
+    for (mut character, mut transform) in &mut query.iter() {
         let mut x_direction = 0.0;
         if keyboard_input.pressed(KeyCode::Left) {
             x_direction -= 1.0;
@@ -55,17 +58,21 @@ pub fn character_movement_system(
         *translation.x_mut() += time.delta_seconds * x_direction * character.speed;
         *translation.x_mut() = translation.x().min(450.0).max(-450.0);
 
-        let mut y_direction = 0.0;
-        if keyboard_input.pressed(KeyCode::Up) {
-            y_direction += 1.0;
+        if keyboard_input.pressed(KeyCode::Up) && !character.is_jumping {
+            character.jump_velocity = 2.0;
+            character.is_jumping = true;
         }
 
-        if keyboard_input.pressed(KeyCode::Down) {
-            y_direction -= 1.0;
+        if !keyboard_input.pressed(KeyCode::Up) && character.is_jumping {
+            character.jump_velocity -= 0.1;
+        }
+
+        if translation.y() == -300.0 {
+            character.is_jumping = false;
         }
 
         let translation = &mut transform.translation_mut();
-        *translation.y_mut() += time.delta_seconds * y_direction * character.speed;
+        *translation.y_mut() += time.delta_seconds * character.jump_velocity * character.speed;
         *translation.y_mut() = translation.y().min(300.0).max(-300.0);
     }
 }
