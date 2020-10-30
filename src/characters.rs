@@ -13,7 +13,7 @@ pub fn setup_character_sprite_sheet(
         .spawn(Camera2dComponents::default())
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
-            transform: Transform::from_scale(6.0),
+            transform: Transform::from_translation_rotation_scale(Vec3::new(-500.0, -400.0, 1.5), Default::default(), 6.0),
             ..Default::default()
         })
         .with(Character { speed: 500.0, jump_velocity: 0.0, is_jumping: false })
@@ -56,7 +56,7 @@ pub fn character_movement_system(
 
         let translation = &mut transform.translation_mut();
         *translation.x_mut() += time.delta_seconds * x_direction * character.speed;
-        *translation.x_mut() = translation.x().min(450.0).max(-450.0);
+        *translation.x_mut() = translation.x().min(600.0).max(-600.0);
 
         if keyboard_input.pressed(KeyCode::Up) && !character.is_jumping {
             character.jump_velocity = 2.0;
