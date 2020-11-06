@@ -10,3 +10,5 @@ edition = "2018"
 bevy = "0.2.1"
 bevy_render = "0.2.1"
 tiled = "0.9.3"
+bevy_tiled = { git = "https://github.com/insrcd/bevy_tiled", branch="master" }
+bevy_window = "0.2.1"

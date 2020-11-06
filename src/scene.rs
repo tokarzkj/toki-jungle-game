@@ -1,8 +1,6 @@
-use bevy::prelude::*;
-use tiled::*;
-use std::fs::File;
-use std::path::Path;
-use std::io::BufReader;
+use bevy_render::camera::Camera;
+use bevy::{prelude::*};
+use bevy_tiled::*;
 
 pub fn load_background(
     mut commands: Commands,
@@ -20,33 +18,33 @@ pub fn load_background(
 pub fn load_tile_map (
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut materials: ResMut<Assets<ColorMaterial>>
 ) {
-    let file = File::open(&Path::new("assets/levels/level1.tmx")).unwrap();
-    let reader = BufReader::new(file);
-    let map = parse(reader).unwrap();
-    println!("Count {}", map.layers.len());
+    commands
+        .spawn(TiledMapComponents {
+            map_asset: asset_server.load("assets/levels/level1-small.tmx").unwrap(),
+            center: TiledMapCenter(true),
+            origin: Transform::from_non_uniform_scale(Vec3::new(10.0, 10.0, 10.0)),
+            ..Default::default()
+        });
+}
 
-    let layer = &map.layers[0];
-    let tiles: &LayerData = &layer.tiles;
+pub fn camera_movement(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&Camera, &mut Transform)>,
+) {
+    for (_, mut transform) in &mut query.iter() {
+        let scale = transform.value().x_axis().x();
 
-    let layer_tiles = match tiles {
-        tiled::LayerData::Finite(layer_tiles) => layer_tiles,
-        tiled::LayerData::Infinite(_) => panic!("error"),
-    };
-
-    for row in layer_tiles.iter() {
-        for tile in row.iter() {
-            if tile.gid == 0 {
-                continue;
-            }
-
-            let tileset = match map.get_tileset_by_gid(tile.gid) {
-                Some(t) => t,
-                None => panic!("No tileset") 
-            };
-
-            println!("this is the tileset {}", tileset.name);
+        if keyboard_input.pressed(KeyCode::Z) {
+            transform.set_scale(scale + 0.1);
         }
+
+        if keyboard_input.pressed(KeyCode::X)  && scale > 1.1 {
+            transform.set_scale(scale - 0.1);
+        }
+
+        let translation = transform.translation();
+
+        transform.set_translation(translation);
     }
 }

@@ -10,10 +10,13 @@ pub fn setup_character_sprite_sheet(
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
     
     commands
-        .spawn(Camera2dComponents::default())
+        .spawn(Camera2dComponents {
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1000.0)).with_scale(2.5),
+            ..Default::default()
+        })
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
-            transform: Transform::from_translation_rotation_scale(Vec3::new(-500.0, -400.0, 1.5), Default::default(), 6.0),
+            transform: Transform::from_translation_rotation_scale(Vec3::new(-100.0, -100.0, 0.0001), Default::default(), 12.0),
             ..Default::default()
         })
         .with(Character { speed: 500.0, jump_velocity: 0.0, is_jumping: false })
@@ -40,10 +43,14 @@ pub struct Character {
 
 
 pub fn character_movement_system(
+    window: Res<WindowDescriptor>,
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&mut Character, &mut Transform)>,
 ) {
+    let width = (window.width as f32 * 1.25) - 30.0;
+    let height = window.height as f32;
+
     for (mut character, mut transform) in &mut query.iter() {
         let mut x_direction = 0.0;
         if keyboard_input.pressed(KeyCode::Left) {
@@ -56,7 +63,7 @@ pub fn character_movement_system(
 
         let translation = &mut transform.translation_mut();
         *translation.x_mut() += time.delta_seconds * x_direction * character.speed;
-        *translation.x_mut() = translation.x().min(600.0).max(-600.0);
+        *translation.x_mut() = translation.x().min(width).max(-width);
 
         if keyboard_input.pressed(KeyCode::Up) && !character.is_jumping {
             character.jump_velocity = 2.0;
@@ -70,9 +77,9 @@ pub fn character_movement_system(
         if translation.y() == -300.0 {
             character.is_jumping = false;
         }
-
+        
         let translation = &mut transform.translation_mut();
         *translation.y_mut() += time.delta_seconds * character.jump_velocity * character.speed;
-        *translation.y_mut() = translation.y().min(300.0).max(-300.0);
+        *translation.y_mut() = translation.y().min(height).max(-height);
     }
 }
