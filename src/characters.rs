@@ -3,20 +3,24 @@ use bevy::prelude::*;
 pub fn setup_character_sprite_sheet(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    window: Res<WindowDescriptor>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     let texture_handle = asset_server.load("assets/Character/sprites/character-idle-spritesheet.png").unwrap();
     let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(24.0, 24.0), 4, 3);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
     
+    let width = (window.width as f32 * 1.25) - 30.0;
+    let height = window.height as f32 * 1.25 - 140.0;
+
     commands
         .spawn(Camera2dComponents {
-            transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1000.0)).with_scale(2.5),
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)).with_scale(2.5),
             ..Default::default()
         })
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
-            transform: Transform::from_translation_rotation_scale(Vec3::new(-100.0, -100.0, 0.0001), Default::default(), 12.0),
+            transform: Transform::from_translation_rotation_scale(Vec3::new(-width, -height, 1.0), Default::default(), 12.0),
             ..Default::default()
         })
         .with(Character { speed: 500.0, jump_velocity: 0.0, is_jumping: false })
@@ -49,7 +53,7 @@ pub fn character_movement_system(
     mut query: Query<(&mut Character, &mut Transform)>,
 ) {
     let width = (window.width as f32 * 1.25) - 30.0;
-    let height = window.height as f32;
+    let height = window.height as f32 * 1.25 - 140.0;
 
     for (mut character, mut transform) in &mut query.iter() {
         let mut x_direction = 0.0;
@@ -66,7 +70,7 @@ pub fn character_movement_system(
         *translation.x_mut() = translation.x().min(width).max(-width);
 
         if keyboard_input.pressed(KeyCode::Up) && !character.is_jumping {
-            character.jump_velocity = 2.0;
+            character.jump_velocity = 4.0;
             character.is_jumping = true;
         }
 
@@ -74,7 +78,7 @@ pub fn character_movement_system(
             character.jump_velocity -= 0.1;
         }
 
-        if translation.y() == -300.0 {
+        if translation.y() == -height {
             character.is_jumping = false;
         }
         
