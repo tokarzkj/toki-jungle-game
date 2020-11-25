@@ -7,8 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = "0.2.1"
-bevy_render = "0.2.1"
+bevy = "0.3.0"
+bevy_render = "0.3.0"
 tiled = "0.9.3"
-bevy_tiled = { git = "https://github.com/insrcd/bevy_tiled", branch="master" }
-bevy_window = "0.2.1"
+bevy_tiled_prototype = { git = "https://github.com/StarArawn/bevy_tiled", branch="master" }
+bevy_window = "0.3.0"
